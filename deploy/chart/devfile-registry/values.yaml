@@ -16,9 +16,9 @@ global:
   tlsEnabled: false
 
 devfileIndex:
-  image: quay.io/devfile/devfile-index
-  tag: next
-  imagePullPolicy: Always
+  image: devfile-index
+  tag: latest
+  imagePullPolicy: Never
   memoryLimit: 256Mi
 
 ociRegistry:
