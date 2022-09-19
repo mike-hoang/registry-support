@@ -7,4 +7,4 @@ metadata:
   projectType: "nodejs"
   language: "nodejs"
 parent:
-    uri: ../../../parent/devfile.yaml
+    uri: ../../parent/devfile.yaml
