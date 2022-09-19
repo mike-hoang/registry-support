@@ -1,8 +1,0 @@
-schemaVersion: 2.1.0
-metadata:
-  name: nodejs-second-level
-  version: 0.0.1
-  displayName: NodeJS Runtime
-  description: Stack with NodeJS using a parent devfile.
-  projectType: "nodejs"
-  language: "nodejs"
