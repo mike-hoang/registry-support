@@ -108,3 +108,5 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.1.2 // indirect
 	sigs.k8s.io/yaml v1.2.0 // indirect
 )
+
+replace github.com/devfile/registry-support/index/generator v0.0.0-20220527155645-8328a8a883be => github.com/mike-hoang/registry-support/index/generator v0.0.0-20230213012159-bb637edc9e54

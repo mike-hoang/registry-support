@@ -101,12 +101,21 @@ build_registry() {
 
   # Run the index generator tool
   echo "Generating the devfile registry index"
+  echo "working directory: "
+  pwd
+  echo "    COMMAND: $generatorFolder/index-generator $outputFolder $outputFolder/index.json"
+
+  #generator <registry directory path> <index file path>
+  #/build-tools/../index/generator/index-generator /build /build/index.json
   $generatorFolder/index-generator $outputFolder $outputFolder/index.json
   if [ $? -ne 0 ]; then
     echo "Failed to build the devfile registry index"
     return 1
   fi
   echo "Successfully built the devfile registry index"
+
+  echo "cat $outputFolder/index.json"
+  cat $outputFolder/index.json
 }
 
 # check_params validates that the arguments passed into the script are valid
