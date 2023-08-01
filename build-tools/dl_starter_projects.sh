@@ -21,6 +21,13 @@ download_git_starter_project() {
     subDir=$(yq e ".starterProjects[] | select(.name == \"${name}\").subDir" $stack_root/devfile.yaml)
     local_path=${stack_root}/${name}-offline
 
+    echo "stack_root = $stack_root"
+    echo "name = $name"
+    echo "remote_name = $remote_name"
+    echo "revision = $revision"
+    echo "subDir = $subDir"
+    echo "local_path = $local_path"
+
     if [ "${remote_name}" == "null" ]
     then
         remote_url=$(yq e ".starterProjects[] | select(.name == \"${name}\").git.remotes.origin" $stack_root/devfile.yaml)
@@ -30,18 +37,22 @@ download_git_starter_project() {
 
     mkdir -p $local_path
 
+    echo "git clone $remote_url $local_path"
     git clone $remote_url $local_path
 
     if [ "${revision}" != "null" ]
     then
-        cd $local_path && git checkout $revision && cd -
+        echo "cd $local_path && git checkout $revision && cd -"
+        cd $local_path && git checkout $revision && ls -a && cd -
     fi
 
     if [ "${subDir}" != "null" ]
     then
-        cd $local_path/$subDir && zip -q ${local_path}.zip * .[^.]* && cd -
+        echo "cd $local_path/$subDir && zip ${local_path}.zip * .[^.]* && ls -a && cd -"
+        cd $local_path/$subDir && zip ${local_path}.zip * .[^.]* && ls -a && cd -
     else
-        cd $local_path && rm -rf ./.git && zip -q ${local_path}.zip * .[^.]* && cd -
+        echo "cd $local_path && rm -rf ./.git && zip ${local_path}.zip * .[^.]* && ls -a && cd -"
+        cd $local_path && rm -rf ./.git && zip ${local_path}.zip * .[^.]* && ls -a && cd -
     fi
 
     rm -rf $local_path
