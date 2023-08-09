@@ -101,12 +101,16 @@ build_registry() {
 
   # Run the index generator tool
   echo "Generating the devfile registry index"
+  echo "$generatorFolder/index-generator $outputFolder $outputFolder/index.json"
   $generatorFolder/index-generator $outputFolder $outputFolder/index.json
+
+  echo "Successfully built the devfile registry index"
+  echo "--- TEST"
+  cat $outputFolder/stacks/udi/devfile.yaml
   if [ $? -ne 0 ]; then
     echo "Failed to build the devfile registry index"
     return 1
   fi
-  echo "Successfully built the devfile registry index"
 }
 
 # check_params validates that the arguments passed into the script are valid

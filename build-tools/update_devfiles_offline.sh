@@ -3,7 +3,7 @@
 # This script will modify the devfiles in each stack to use offline resources.
 
 # Path of stacks directory in the registry
-STACKS_DIR=/registry/stacks
+STACKS_DIR=tests/registry/stacks
 # Automated comment used to check whether the devfile has already been modified
 MODIFIED_MESSAGE="# AUTOMATED MODIFICATION -"
 
@@ -57,6 +57,7 @@ new_starter_projects() {
 
 # Read stacks list
 read -r -a stacks <<< "$(ls ${STACKS_DIR} | tr '\n' ' ')"
+echo "stacks: ${stacks[@]}"
 
 echo "Updating devfiles.."
 for stack in ${stacks[@]}
@@ -70,6 +71,8 @@ do
     # Read version list for stack
     read -r -a versions <<< "$(ls ${STACKS_DIR}/${stack} | grep -e '[0-9].[0-9].[0-9]' | tr '\n' ' ')"
 
+    echo "stack: ${stack}"
+
     # If multi version stack
     if [[ ${#versions[@]} -gt 0 ]]
     then
@@ -79,6 +82,12 @@ do
             stack_devfile=$stack_root/devfile.yaml
             starter_projects="$(yq e ".starterProjects[].name" $stack_devfile)"
             echo -n "starterProjects:" > $offline_starter_projects
+
+            if [[ $starter_projects == "" ]]
+            then
+                echo "Skipping stack ${stack} version ${version}: no starter projects found."
+                continue
+            fi
 
             for starter_project in $starter_projects
             do
@@ -95,6 +104,7 @@ do
 
             # Only write to the devfile if starter projects have been commented out
             has_starterProjects=$(yq e '.starterProjects' $stack_devfile 2> /dev/null)
+            echo "has_starterProjects: ${has_starterProjects}"
             if [[ $has_starterProjects == null ]] && ! grep -q "$MODIFIED_MESSAGE" "$stack_devfile"
             then
                     echo "${MODIFIED_MESSAGE} Updated starterProjects to use offline versions" >> $stack_devfile
@@ -105,6 +115,13 @@ do
     else
         starter_projects="$(yq e ".starterProjects[].name" $stack_devfile)"
         echo -n "starterProjects:" > $offline_starter_projects
+        echo "starter_projects: ${starter_projects}"
+
+        if [[ $starter_projects == "" ]]
+        then
+            echo "Skipping stack ${stack} version ${version}: no starter projects found."
+            continue
+        fi
 
         for starter_project in $starter_projects
         do
@@ -123,6 +140,7 @@ do
         has_starterProjects=$(yq e '.starterProjects' $stack_devfile 2> /dev/null)
         if [[ $has_starterProjects == null ]] && ! grep -q "$MODIFIED_MESSAGE" "$stack_devfile"
         then
+            echo "MODIFYING"
             echo "${MODIFIED_MESSAGE} Updated starterProjects to use offline versions" >> $stack_devfile
             cat $offline_starter_projects >> $stack_devfile
         fi

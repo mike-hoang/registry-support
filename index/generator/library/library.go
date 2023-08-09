@@ -217,7 +217,7 @@ func dirExists(dirpath string) error {
 }
 
 func iconExists(iconUrl string) bool {
-        /* #nosec G107 -- iconUrl is taken from the index file.  Stacks / Samples with URLs to a devfile icon should be vetted beforehand */
+	/* #nosec G107 -- iconUrl is taken from the index file.  Stacks / Samples with URLs to a devfile icon should be vetted beforehand */
 	resp, err := http.Get(iconUrl)
 	if err != nil {
 		return false
@@ -252,6 +252,10 @@ func parseDevfileRegistry(registryDirPath string, force bool) ([]schema.Schema, 
 		}
 		stackFolderPath := filepath.Join(stackDirPath, stackFolderDir.Name())
 		stackYamlPath := filepath.Join(stackFolderPath, stackYaml)
+
+		fmt.Println("stackFolderPath: ", stackFolderPath)
+		fmt.Println("stackYamlPath  : ", stackYamlPath)
+
 		// if stack.yaml exist,  parse stack.yaml
 		var indexComponent schema.Schema
 		if fileExists(stackYamlPath) {
