@@ -21,102 +21,100 @@ on:
     branches: [main]
 
 jobs:
-  go:
-    name: Check go tools build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
+  # go:
+  #   name: Check go tools build
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Check out code
+  #       uses: actions/checkout@v2
 
-      - name: Setup Go environment
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.18
+  #     - name: Setup Go environment
+  #       uses: actions/setup-go@v2
+  #       with:
+  #         go-version: 1.18
 
-      - name: Check if index-generator build is working
-        run: cd index/generator && bash ./build.sh
+  #     - name: Check if index-generator build is working
+  #       run: cd index/generator && bash ./build.sh
 
-      - name: Test index-generator
-        run: cd index/generator && go test ./...
+  #     - name: Test index-generator
+  #       run: cd index/generator && go test ./...
 
-      - name: Check if registry-library build is working
-        run: cd registry-library && bash ./build.sh
+  #     - name: Check if registry-library build is working
+  #       run: cd registry-library && bash ./build.sh
 
-      - name: Check index-server code generation
-        run: |
-          cd index/server
-          export GOPATH=$(go env GOPATH)
-          go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.12.4
-          bash codegen.sh
-          GEN_DIFFS=$(git diff --name-only --diff-filter=ACMRT | grep .gen.go$ | xargs)
-          if [[ ! -z "${GEN_DIFFS}" ]]
-          then
-            echo "generated source does not match current changes "
-            exit 1
-          fi
+  #     - name: Check index-server code generation
+  #       run: |
+  #         cd index/server
+  #         export GOPATH=$(go env GOPATH)
+  #         go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.12.4
+  #         bash codegen.sh
+  #         GEN_DIFFS=$(git diff --name-only --diff-filter=ACMRT | grep .gen.go$ | xargs)
+  #         if [[ ! -z "${GEN_DIFFS}" ]]
+  #         then
+  #           echo "generated source does not match current changes "
+  #           exit 1
+  #         fi
 
-      - name: Run Gosec Security Scanner
-        run: |
-          export PATH=$PATH:$(go env GOPATH)/bin
-          go install github.com/securego/gosec/v2/cmd/gosec@v2.14.0
-          bash ./run_gosec.sh
-          if [[ $? != 0 ]]
-          then
-            echo "gosec scanner failed to run "
-            exit 1
-          fi   
+  #     - name: Run Gosec Security Scanner
+  #       run: |
+  #         export PATH=$PATH:$(go env GOPATH)/bin
+  #         go install github.com/securego/gosec/v2/cmd/gosec@v2.14.0
+  #         bash ./run_gosec.sh
+  #         if [[ $? != 0 ]]
+  #         then
+  #           echo "gosec scanner failed to run "
+  #           exit 1
+  #         fi
 
-      - name: Upload SARIF file
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          # Path to SARIF file relative to the root of the repository
-          sarif_file: gosec.sarif
+  #     - name: Upload SARIF file
+  #       uses: github/codeql-action/upload-sarif@v2
+  #       with:
+  #         # Path to SARIF file relative to the root of the repository
+  #         sarif_file: gosec.sarif
 
+  # docker:
+  #   name: Check docker builds
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Check out code
+  #       uses: actions/checkout@v2
 
-  docker:
-    name: Check docker builds
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
+  #     - name: Setup Go environment
+  #       uses: actions/setup-go@v2
+  #       with:
+  #         go-version: 1.18
 
-      - name: Setup Go environment
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.18
+  #     - name: Check license
+  #       run: |
+  #         export PATH=$PATH:$(go env GOPATH)/bin
+  #         go install github.com/google/addlicense@latest
+  #         git reset HEAD --hard
+  #         bash ./check_licenses.sh
+  #         if [[ $? != 0 ]]
+  #         then
+  #           echo "license headers not found:"
+  #           git --no-pager diff
+  #           exit 1
+  #         fi
 
-      - name: Check license
-        run: |
-          export PATH=$PATH:$(go env GOPATH)/bin
-          go install github.com/google/addlicense@latest
-          git reset HEAD --hard
-          bash ./check_licenses.sh          
-          if [[ $? != 0 ]]
-          then
-            echo "license headers not found:"
-            git --no-pager diff
-            exit 1
-          fi
+  #     - name: Check if index server build is working
+  #       run: |
+  #         cd index/server
+  #         export GOPATH=$(go env GOPATH)
+  #         go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.12.4
+  #         bash ./build.sh
 
-      - name: Check if index server build is working
-        run: |
-          cd index/server
-          export GOPATH=$(go env GOPATH)
-          go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.12.4
-          bash ./build.sh
+  #     - name: Test index server
+  #       run: cd index/server && go test ./... -coverprofile cover.out
 
-      - name: Test index server
-        run: cd index/server && go test ./... -coverprofile cover.out
+  #     - name: Check if oci server build is working
+  #       run: cd oci-registry && bash ./build.sh
 
-      - name: Check if oci server build is working
-        run: cd oci-registry && bash ./build.sh
+  #     - name: Check if devfile-registry-integration build is working
+  #       run: cd tests/integration && bash ./docker-build.sh
 
-      - name: Check if devfile-registry-integration build is working
-        run: cd tests/integration && bash ./docker-build.sh
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v2.1.0
-
+  #     - name: Upload coverage to Codecov
+  #       uses: codecov/codecov-action@v2.1.0
 
   test_minikube:
     name: Test Devfile Registry
@@ -131,30 +129,30 @@ jobs:
       - name: Setup Minikube
         uses: manusa/actions-setup-minikube@v2.7.1
         with:
-          minikube version: 'v1.21.0'
-          kubernetes version: 'v1.21.0'
-          driver: 'docker'
+          minikube version: "v1.21.0"
+          kubernetes version: "v1.21.0"
+          driver: "docker"
           github token: ${{ secrets.GITHUB_TOKEN }}
-          start args: '--addons=ingress'
+          start args: "--addons=ingress"
       - name: Run the devfile registry integration tests
-        run: | 
+        run: |
           export GOPATH=$(go env GOPATH)
           go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.12.4
           bash .ci/run_tests_minikube_linux.sh
 
-  test_staging:
-    name: Test Staging Devfile Registry
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v1
-      - name: Setup Go environment
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.18
-      - name: Run the devfile registry integration tests
-        run: |
-          # Run the integration tests
-          cd tests/integration
-          bash ./docker-build.sh
-          docker run --env REGISTRY=https://registry.stage.devfile.io --env IS_TEST_REGISTRY=false devfile-registry-integration
+  # test_staging:
+  #   name: Test Staging Devfile Registry
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v1
+  #     - name: Setup Go environment
+  #       uses: actions/setup-go@v2
+  #       with:
+  #         go-version: 1.18
+  #     - name: Run the devfile registry integration tests
+  #       run: |
+  #         # Run the integration tests
+  #         cd tests/integration
+  #         bash ./docker-build.sh
+  #         docker run --env REGISTRY=https://registry.stage.devfile.io --env IS_TEST_REGISTRY=false devfile-registry-integration

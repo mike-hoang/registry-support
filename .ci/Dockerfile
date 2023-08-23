@@ -27,11 +27,17 @@ COPY build-tools /build-tools
 COPY index/ /index
 COPY tests/registry /registry
 
+# Download all the offline parent devfiles
+RUN bash /build-tools/dl_parent_devfiles.sh
+
 # Download offline starter projects
 RUN bash /build-tools/dl_starter_projects.sh go-starter community
 
 # Run the registry build tools
 RUN bash /build-tools/build.sh /registry /build
+
+# Extract archived resources
+# RUN bash /build-tools/extract_resources.sh
 
 FROM devfile-index-base
 

@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Path of stacks directory in the registry
-STACKS_DIR=/registry/stacks
+# STACKS_DIR=${STACKS_DIR:-tests/registry/stacks}
+STACKS_DIR=${STACKS_DIR:-/registry/stacks}
 
 # Downloads the parent devfile to be used as an offline resource
 download_parent_devfile() {
@@ -12,6 +13,8 @@ download_parent_devfile() {
 
     if [ ! -f $stack_root/$parent_devfile ]; then
         curl -L $parent_devfile_uri -o $stack_root/$parent_devfile || return 1
+        echo "ls -a $stack_root/$parent_devfile"
+        ls -a $stack_root/$parent_devfile
     fi
 }
 
@@ -21,10 +24,13 @@ replace_parent_devfile() {
     local name=$2
     local parent_devfile_uri=$3
     stack_devfile=$stack_root/devfile.yaml
-    parent_devfile=${name}-parent.devfile.yaml
+    parent_devfile=../${name}-parent.devfile.yaml
 
     if [ -f $stack_root/$parent_devfile ]; then
-        d=$parent_devfile yq '.parent.uri = env(d)' $stack_devfile -i
+        export PARENT_DEVFILE=$parent_devfile
+        yq e -i ".parent.uri=env(PARENT_DEVFILE)" $stack_devfile
+        test="$(yq e ".parent.uri" $stack_devfile)"
+        echo "New uri: $test"
     fi
 }
 
@@ -37,7 +43,7 @@ download_and_replace() {
         stack_root=$STACKS_DIR/$stack
         stack_devfile=$stack_root/devfile.yaml
         # Read version list for stack
-        read -r -a versions <<< "$(ls ${STACKS_DIR}/${stack} | grep -e '[0-9].[0-9].[0-9]' | tr '\n' ' ')"
+        versions=($([ -f ${STACKS_DIR}/${stack}/stack.yaml ] && yq e '.versions.[].version' ${STACKS_DIR}/${stack}/stack.yaml))
         # Multi version stack
         if [[ ${#versions[@]} -gt 0 ]]
         then
